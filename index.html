@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control de Gastos 12BTP01</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style id="app-style">
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --success: #198754;
+      --danger: #dc3545;
+      --warning: #f8961e;
+      --light-bg: #f8f9fa;
+      --dark-text: #212529;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+      color: white;
+      padding: 2rem 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .app-header h1 {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      padding: 2rem 0;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .transaction-table th {
+      position: sticky;
+      top: 0;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      z-index: 10;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+      padding: 1rem !important;
+    }
+
+    .transaction-table td {
+      padding: 1rem !important;
+      border-bottom: 1px solid #e9ecef;
+      vertical-align: middle;
+    }
+
+    .transaction-table tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    .transaction-table tbody tr:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      margin-bottom: 1.5rem;
+      transition: all 0.3s ease;
+      border-left: 5px solid var(--primary);
+    }
+
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.75rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-value.income {
+      --primary: #198754;
+      --secondary: #157347;
+    }
+
+    .stat-value.expense {
+      --primary: #dc3545;
+      --secondary: #bb2d3b;
+    }
+
+    .stat-value.TOTAL {
+      --primary: #0dcaf0;
+      --secondary: #0aa2c0;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-bottom: 2px solid #dee2e6;
+      padding: 1.5rem;
+      font-weight: 600;
+      color: var(--dark-text);
+    }
+
+    .card-body {
+      padding: 2rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--dark-text);
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .form-control,
+    .form-select {
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+      outline: none;
+    }
+
+    .form-control::placeholder {
+      color: #adb5bd;
+    }
+
+    .btn-income {
+      background: linear-gradient(135deg, #198754 0%, #157347 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-income:hover {
+      background: linear-gradient(135deg, #157347 0%, #0d3a28 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(25, 135, 84, 0.3);
+      color: white;
+    }
+
+    .btn-income:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #5a6268 0%, #4a5568 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+      color: white;
+    }
+
+    .btn-outline-danger {
+      border: 2px solid var(--danger);
+      color: var(--danger);
+      background: transparent;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-danger:hover {
+      background-color: var(--danger);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .transaction-badge {
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-block;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-income {
+      background: linear-gradient(135deg, #d1e7dd 0%, #c3e6cb 100%);
+      color: #0f5132;
+      border: 1px solid #badbcc;
+    }
+
+    .badge-expense {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      color: #842029;
+      border: 1px solid #f1b0b7;
+    }
+
+    .transaction-amount {
+      font-weight: 700;
+      font-size: 1.1rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .transaction-amount.income {
+      color: #198754;
+    }
+
+    .transaction-amount.expense {
+      color: #dc3545;
+    }
+
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      visibility: hidden;
+      backdrop-filter: blur(4px);
+    }
+
+    .spinner-border {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .row {
+      margin-bottom: 0;
+    }
+
+    .user-selector {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .user-selector .form-check {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .user-selector .form-check:last-child {
+      border-bottom: none;
+    }
+
+    .user-selector .form-check-input {
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .user-selector .form-check-input:checked {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .user-selector .form-check-label {
+      cursor: pointer;
+      margin-bottom: 0;
+      margin-left: 0.5rem;
+    }
+
+    .selected-users {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .user-badge {
+      background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-badge .remove-user {
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.8;
+    }
+
+    .user-badge .remove-user:hover {
+      opacity: 1;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #3f37c9 0%, #2d2fa8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .app-header {
+        padding: 1rem 0.5rem;
+      }
+
+      .app-header h1 {
+        font-size: 1.25rem;
+      }
+
+      main {
+        padding: 1rem 0;
+      }
+
+      .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+      }
+
+      .col-md-4,
+      .col-md-8 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      }
+
+      .card-body {
+        padding: 1.25rem 1rem;
+      }
+
+      .card-header {
+        padding: 1rem;
+      }
+
+      .card-header h5 {
+        font-size: 0.95rem;
+      }
+
+      .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-control,
+      .form-select {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .stats-card {
+        padding: 1.25rem 1rem;
+        margin-bottom: 1rem;
+        border-left-width: 3px;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        line-height: 1;
+      }
+
+      .table-container {
+        margin-bottom: 1rem;
+        overflow-x: auto;
+      }
+
+      .transaction-table {
+        font-size: 0.85rem;
+      }
+
+      .transaction-table th {
+        padding: 0.5rem !important;
+        font-size: 0.75rem;
+      }
+
+      .transaction-table td {
+        padding: 0.5rem !important;
+      }
+
+      #deleteSelectedHeaderBtn {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.65rem;
+      }
+
+      .transaction-badge {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+      }
+
+      .transaction-amount {
+        font-size: 0.95rem;
+      }
+
+      .btn-sm {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8rem;
+      }
+
+      .modal-dialog {
+        margin: 0.5rem;
+      }
+
+      .modal-body {
+        padding: 1rem;
+      }
+
+      #bulkUsersList {
+        max-height: 250px;
+      }
+
+      .badge {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.6rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+
+      .app-header h1 {
+        font-size: 1.1rem;
+      }
+
+      .row {
+        margin-left: -0.25rem;
+        margin-right: -0.25rem;
+      }
+
+      .col-md-4,
+      .col-md-8 {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .card-body {
+        padding: 1rem;
+      }
+
+      .card-header {
+        padding: 0.75rem;
+      }
+
+      .card-header h5 {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+      }
+
+      .form-label {
+        font-size: 0.75rem;
+      }
+
+      .form-control,
+      .form-select {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+      }
+
+      .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+
+      .btn-secondary,
+      .btn-primary,
+      .btn-income {
+        margin-bottom: 0.5rem;
+      }
+
+      .stats-card {
+        padding: 1rem 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .stat-label {
+        font-size: 0.65rem;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-value {
+        font-size: 1.25rem;
+      }
+
+      .transaction-table {
+        font-size: 0.75rem;
+      }
+
+      .transaction-table th,
+      .transaction-table td {
+        padding: 0.5rem !important;
+      }
+
+      .transaction-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.65rem;
+      }
+
+      .transaction-amount {
+        font-size: 0.85rem;
+      }
+
+      .text-end {
+        text-align: right !important;
+      }
+
+      .text-center {
+        text-align: center !important;
+      }
+
+      .modal-dialog {
+        margin: 0.25rem;
+      }
+
+      .modal-header {
+        padding: 0.75rem;
+      }
+
+      .modal-header .btn-close {
+        padding: 0.25rem;
+      }
+
+      .modal-title {
+        font-size: 0.9rem;
+      }
+
+      .modal-footer {
+        padding: 0.75rem;
+        gap: 0.5rem;
+      }
+
+      #bulkUsersList {
+        max-height: 200px;
+      }
+
+      .user-selector {
+        max-height: 200px;
+      }
+
+      .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .col-md-6 {
+        width: 100%;
+      }
+
+      .transaction-table th {
+        padding: 0.4rem !important;
+        font-size: 0.6rem;
+      }
+
+      .transaction-table td {
+        padding: 0.4rem !important;
+      }
+
+      #deleteSelectedHeaderBtn {
+        padding: 0.2rem 0.35rem !important;
+        font-size: 0.55rem;
+      }
+
+      .transaction-table {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loader" class="loader-overlay">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <header class="app-header">
+    <div class="container-fluid">
+      <h1 class="h4 mb-0">Control de Gastos 12BTP01</h1>
+    </div>
+  </header>
+
+  <main class="container-fluid py-4">
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="stats-card">
+          <div class="stat-label">Ingresos Totales</div>
+          <div class="stat-value income" id="totalIncome">0 LPS</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card">
+          <div class="stat-label">Gastos Totales</div>
+          <div class="stat-value expense" id="totalExpense">0 LPS</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card">
+          <div class="stat-label">TOTAL</div>
+          <div class="stat-value TOTAL" id="totalBalance">0 LPS</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Agregar Transacción</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="transactionDate" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="transactionDate">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="transactionUser" class="form-label">Usuario</label>
+                <select class="form-select" id="transactionUser">
+                  <option value="">-- Seleccionar Usuario --</option>
+                </select>
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="transactionType" class="form-label">Tipo de Transacción</label>
+                <select class="form-select" id="transactionType">
+                  <option value="">-- Seleccionar --</option>
+                  <option value="income">Ingreso</option>
+                  <option value="expense">Gasto</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="transactionCategory" class="form-label"> Descripción</label>
+                <input type="text" class="form-control" id="transactionCategory" placeholder="Motivo de pago">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="transactionAmount" class="form-label">Monto (LPS)</label>
+                <input type="number" class="form-control" id="transactionAmount" placeholder="0.00" min="0" step="0.01">
+              </div>
+              <div class="col-12 mb-3" style="display: none;">
+                <label for="transactionDescription" class="form-label">Descripción adicional</label>
+                <textarea class="form-control" id="transactionDescription" rows="2"></textarea>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-income" id="addIncomeBtn">
+                  <i class="fas fa-plus me-1"></i> Registrar Transacción
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Filtros</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="filterType" class="form-label">Tipo</label>
+              <select class="form-select" id="filterType">
+                <option value="">Todos</option>
+                <option value="income">Ingresos</option>
+                <option value="expense">Gastos</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="filterCategory" class="form-label">Motivo de Pago</label>
+              <input type="text" class="form-control" id="filterCategory" placeholder="Buscar...">
+            </div>
+            <button class="btn btn-secondary w-100 mb-3" id="resetFiltersBtn">
+              <i class="fas fa-redo me-1"></i> Limpiar Filtros
+            </button>
+            <button class="btn btn-primary w-100 mb-3" id="bulkModeBtn">
+              <i class="fas fa-users me-1"></i> Crear Múltiples
+            </button>
+            <button class="btn btn-primary w-100" id="printReportBtn">
+              <i class="fas fa-file-pdf me-1"></i> Descargar PDF
+            </button>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="table table-hover transaction-table">
+        <thead>
+          <tr>
+            <th scope="col" class="text-center"><input type="checkbox" id="selectAllCheckbox" title="Seleccionar todo"></th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Usuario</th>
+            
+            <th scope="col">Motivo de Pago</th>
+            <th scope="col" class="text-end">Monto</th>
+            <th scope="col" class="text-center">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <span>Acciones</span>
+                <button id="deleteSelectedHeaderBtn" class="btn btn-sm btn-outline-danger" title="Eliminar transacciones seleccionadas">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="transactionsTableBody">
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div class="modal fade" id="bulkModeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Crear Múltiples Transacciones</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <input type="text" class="form-control" id="bulkUserSearch" placeholder="Buscar usuario...">
+          </div>
+          <div class="mb-3">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllBtn">
+              <i class="fas fa-check-double me-1"></i> Seleccionar Todos
+            </button>
+          </div>
+          <div style="max-height: 400px; overflow-y: auto;">
+            <div id="bulkUsersList"></div>
+          </div>
+          <div id="selectedUsersList" class="mt-3">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="bulkCreateBtn">Crear Transacciones</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <script id="app-script">
+    const users = [
+      { id: 0, name: 'TODA EL AULA' },
+      { id: 1, name: 'ALEJANDRA NAZARETH RAMIREZ' },
+      { id: 2, name: 'ANGELY YUDITH MEJIA AGUILAR' },
+      { id: 3, name: 'CARLA MARIA DAVID HERNANDEZ' },
+      { id: 4, name: 'CRISTAL ANAHIS CORTES AVILA' },
+      { id: 5, name: 'FATIMA MARISELA AGUILAR JIMENEZ' },
+      { id: 6, name: 'FRANCIA ELIZABETH MEDINA LAGOS' },
+      { id: 7, name: 'HEYLI SAMANTHA MOLINA CRUZ' },
+      { id: 8, name: 'JESSY NICOLLE GRANADOS MARTINEZ' },
+      { id: 9, name: 'JOHANI SORTO' },
+      { id: 10, name: 'KATHERINE VANESSA FLORES PORTILLO' },
+      { id: 11, name: 'MAYLIN GISSELA BORJAS GARCIA' },
+      { id: 12, name: 'MEYLIN MARILI CARRANZA MALDONADO' },
+      { id: 13, name: 'RIXY GISSELLE CACERES MONCADA' },
+      { id: 14, name: 'SAIDA JUDITH DONAIRE HERNANDEZ' },
+      { id: 15, name: 'ABNER JARIEL RODRIGUEZ RIVERA' },
+      { id: 16, name: 'ALEXANDER NAIN CRUZ CARRANZA' },
+      { id: 17, name: 'ANDERSON JOSEPH GIRON BONILLA' },
+      { id: 18, name: 'ANDY EDUARDO EUCEDA VARELA' },
+      { id: 19, name: 'ANTHONY JAIR SALGADO JIMENES' },
+      { id: 20, name: 'CHRISTOPHER JAFET ANDINO VALLADARES' },
+      { id: 21, name: 'CRISTOPHER DONOVAN URQUIA MORENO' },
+      { id: 22, name: 'CRISTOPHER RODRIGO CRUZ ALVAREZ' },
+      { id: 23, name: 'DANIEL AGUSTIN SOLER NOLASCO' },
+      { id: 24, name: 'FERNANDO GABRIEL CASTRO QUEVEDO' },
+      { id: 25, name: 'GABRIEL GALO CALDERON' },
+      { id: 26, name: 'GEOVANY ALEJANDRO MENCIA MARTINEZ' },
+      { id: 27, name: 'HECTOR EMANUEL ROSALES CACERES' },
+      { id: 28, name: 'IAN YAHIR HERNANDEZ GAMEZ' },
+      { id: 29, name: 'JADIEL ALEJANDRO RODRIGUEZ CARBAJAL' },
+      { id: 30, name: 'JAFETH ESAU TORRES ORTEGA' },
+      { id: 31, name: 'JARI ABIMAEL RODRIGUEZ CARBAJAL' },
+      { id: 32, name: 'JOSE MANUEL VALLE MEJIA' },
+      { id: 33, name: 'JOSE MARIANO BONILLA VELASQUEZ' },
+      { id: 34, name: 'JOSE YAHVE HERRERA SANTOS' },
+      { id: 35, name: 'JOSUAN JOEL MENCIA ALVARADO' },
+      { id: 36, name: 'JUNIOR EFRAIN TORRES BANEGAS' },
+      { id: 37, name: 'KENNETH OBDULIO GUTIERREZ VASQUEZ' },
+      { id: 38, name: 'KRISTOPHER JAFET HERRERA RAMOS' }
+    ];
+    let transactions = [];
+    let settings = {
+      currency: 'LPS'
+    };
+    const transactionsTableBody = document.getElementById('transactionsTableBody');
+    const loader = document.getElementById('loader');
+    const addIncomeBtn = document.getElementById('addIncomeBtn');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const transactionDate = document.getElementById('transactionDate');
+    const transactionUser = document.getElementById('transactionUser');
+    const transactionType = document.getElementById('transactionType');
+    const transactionCategory = document.getElementById('transactionCategory');
+    const transactionAmount = document.getElementById('transactionAmount');
+    const transactionDescription = document.getElementById('transactionDescription');
+    
+    const filterType = document.getElementById('filterType');
+    const filterCategory = document.getElementById('filterCategory');
+    const printReportBtn = document.getElementById('printReportBtn');
+    const deleteSelectedHeaderBtn = document.getElementById('deleteSelectedHeaderBtn');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    let selectedTransactionIds = new Set();
+    const bulkModeBtn = document.getElementById('bulkModeBtn');
+    const bulkCreateBtn = document.getElementById('bulkCreateBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const bulkModeModal = new bootstrap.Modal(document.getElementById('bulkModeModal'));
+    const bulkUsersList = document.getElementById('bulkUsersList');
+    const selectedUsersList = document.getElementById('selectedUsersList');
+    let selectedUsers = [];
+    function initApp() {
+      setTodayDate();
+      loadFromLocalStorage();
+      populateUserSelect();
+      renderTransactions();
+      setupEventListeners();
+    }
+    function setTodayDate() {
+      const today = new Date().toISOString().split('T')[0];
+      transactionDate.value = today;
+    }
+    function populateUserSelect() {
+      users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = user.name;
+        transactionUser.appendChild(option);
+      });
+      users.forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'form-check p-2';
+
+        const checkbox = document.createElement('input');
+        checkbox.className = 'form-check-input';
+        checkbox.type = 'checkbox';
+        checkbox.id = `user_${user.id}`;
+        checkbox.value = user.id;
+        checkbox.setAttribute('data-user-name', user.name);
+        checkbox.addEventListener('change', toggleUser);
+
+        const label = document.createElement('label');
+        label.className = 'form-check-label';
+        label.htmlFor = `user_${user.id}`;
+        label.textContent = user.name;
+
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        bulkUsersList.appendChild(div);
+      });
+    }
+    function toggleUser(e) {
+      const userId = parseInt(e.target.value);
+
+      if (e.target.checked) {
+        selectedUsers.push(userId);
+      } else {
+        selectedUsers = selectedUsers.filter(id => id !== userId);
+      }
+
+      updateSelectedUsersList();
+    }
+    function updateSelectedUsersList() {
+      selectedUsersList.innerHTML = '';
+
+      if (selectedUsers.length > 0) {
+        const title = document.createElement('div');
+        title.className = 'fw-bold mb-2';
+        title.textContent = `${selectedUsers.length} usuario(s) seleccionado(s):`;
+        selectedUsersList.appendChild(title);
+
+        selectedUsers.forEach(userId => {
+          const user = users.find(u => u.id === userId);
+          const badge = document.createElement('span');
+          badge.className = 'badge bg-primary me-2 mb-2';
+          badge.innerHTML = `
+            ${user.name}
+            <span class="remove-user ms-1" onclick="removeSelectedUser(${userId})" style="cursor: pointer;">✕</span>
+          `;
+          selectedUsersList.appendChild(badge);
+        });
+      }
+    }
+
+    window.removeSelectedUser = function (userId) {
+      const checkbox = document.getElementById(`user_${userId}`);
+      checkbox.checked = false;
+      selectedUsers = selectedUsers.filter(id => id !== userId);
+      updateSelectedUsersList();
+    };
+
+    function loadFromLocalStorage() {
+      const storedTransactions = localStorage.getItem('transactions');
+      const storedSettings = localStorage.getItem('settings');
+
+      if (storedTransactions) {
+        transactions = JSON.parse(storedTransactions);
+      }
+
+      if (storedSettings) {
+        settings = { ...settings, ...JSON.parse(storedSettings) };
+      }
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+
+    function detectTransactionType(category) {
+      const categoryLower = category.toLowerCase();
+
+      const expenseKeywords = ['gasto', 'pago', 'compra', 'costo', 'cuenta', 'servicio', 'renta', 'luz', 'agua', 'internet', 'teléfono', 'transporte', 'material', 'supplies', 'suministro'];
+
+      if (expenseKeywords.some(keyword => categoryLower.includes(keyword))) {
+        return 'expense';
+      }
+
+      const studentNames = users.map(u => u.name.toLowerCase());
+      if (studentNames.some(name => categoryLower.includes(name))) {
+        return 'income';
+      }
+
+      return 'income';
+    }
+
+    function addTransaction() {
+      const date = transactionDate.value;
+      const userId = transactionUser.value;
+      const category = transactionCategory.value.trim();
+      const amount = parseFloat(transactionAmount.value);
+      const description = transactionDescription.value.trim();
+      const typeSelection = transactionType.value;
+
+      if (!date) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor selecciona una fecha'
+        });
+        return;
+      }
+
+      if (!userId) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor selecciona un usuario'
+        });
+        return;
+      }
+
+      if (!typeSelection) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor selecciona el tipo de transacción'
+        });
+        return;
+      }
+
+      if (!category) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor ingresa una descripción'
+        });
+        return;
+      }
+
+      if (!amount || amount <= 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor ingresa un monto válido'
+        });
+        return;
+      }
+
+      const type = typeSelection;
+
+      if (type === 'expense') {
+        const { balance } = calculateTotals();
+        if (balance - amount < 0) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Fondo insuficiente',
+            text: `No tienes suficiente saldo. TOTAL actual: ${balance.toFixed(2)} ${settings.currency}, Monto solicitado: ${amount.toFixed(2)} ${settings.currency}`
+          });
+          return;
+        }
+      }
+
+      showLoader();
+
+      setTimeout(() => {
+        const user = users.find(u => u.id == userId);
+        const transaction = {
+          id: Date.now(),
+          date: date,
+          type: type,
+          userId: userId,
+          userName: user.name,
+          category: category,
+          amount: amount,
+          description: category
+        };
+
+        transactions.push(transaction);
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        saveToLocalStorage();
+        clearForm();
+        renderTransactions();
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Guardado',
+          text: `${type === 'income' ? 'Ingreso' : 'Gasto'} registrado correctamente`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        hideLoader();
+      }, 300);
+    }
+
+    function clearForm() {
+      setTodayDate();
+      transactionUser.value = '';
+      transactionType.value = '';
+      transactionCategory.value = '';
+      transactionAmount.value = '';
+    }
+
+    function deleteTransaction(id) {
+      Swal.fire({
+        title: '¿Eliminar transacción?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          transactions = transactions.filter(t => t.id !== id);
+          saveToLocalStorage();
+          renderTransactions();
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Eliminado',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        }
+      });
+    }
+
+    function calculateTotals() {
+      const income = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const expense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const balance = income - expense;
+
+      return { income, expense, balance };
+    }
+
+    function updateStats() {
+      const { income, expense, balance } = calculateTotals();
+      const balanceClass = balance < 0 ? 'style="color: #dc3545;"' : '';
+
+      document.getElementById('totalIncome').textContent = `${income.toFixed(2)} ${settings.currency}`;
+      document.getElementById('totalExpense').textContent = `${expense.toFixed(2)} ${settings.currency}`;
+      document.getElementById('totalBalance').innerHTML = `<span ${balanceClass}>${balance < 0 ? '⚠️ ' : ''}${balance.toFixed(2)} ${settings.currency}</span>`;
+    }
+
+    function getFilteredTransactions() {
+      const typeFilter = filterType.value;
+      const categoryFilter = filterCategory.value.toLowerCase();
+
+      return transactions.filter(t => {
+        const typeMatch = !typeFilter || t.type === typeFilter;
+        const categoryMatch = !categoryFilter || t.category.toLowerCase().includes(categoryFilter) || t.userName.toLowerCase().includes(categoryFilter);
+        return typeMatch && categoryMatch;
+      });
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr + 'T00:00:00');
+      return date.toLocaleDateString('es-HN', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function renderTransactions() {
+      updateStats();
+
+      const filtered = getFilteredTransactions();
+      transactionsTableBody.innerHTML = '';
+
+        if (filtered.length === 0) {
+        const row = transactionsTableBody.insertRow();
+        row.innerHTML = '<td colspan="7" class="text-center py-4 text-muted">No hay transacciones</td>';
+        return;
+      }
+
+      filtered.forEach(transaction => {
+        const row = transactionsTableBody.insertRow();
+
+        const selectCell = row.insertCell();
+        selectCell.className = 'text-center';
+        const selectInput = document.createElement('input');
+        selectInput.type = 'checkbox';
+        selectInput.className = 'row-select';
+        selectInput.setAttribute('data-id', transaction.id);
+        selectInput.addEventListener('change', (ev) => {
+          const id = ev.target.getAttribute('data-id');
+          if (ev.target.checked) selectedTransactionIds.add(id);
+          else selectedTransactionIds.delete(id);
+          const all = document.querySelectorAll('.row-select');
+          const checked = document.querySelectorAll('.row-select:checked');
+          document.getElementById('selectAllCheckbox').checked = (all.length > 0 && checked.length === all.length);
+          document.getElementById('selectAllCheckbox').indeterminate = (checked.length > 0 && checked.length < all.length);
+        });
+        if (selectedTransactionIds.has(String(transaction.id))) selectInput.checked = true;
+        selectCell.appendChild(selectInput);
+
+        const dateCell = row.insertCell();
+        dateCell.textContent = formatDate(transaction.date);
+
+        const typeCell = row.insertCell();
+        typeCell.innerHTML = `<span class="transaction-badge ${transaction.type === 'income' ? 'badge-income' : 'badge-expense'}">
+          ${transaction.type === 'income' ? 'Ingreso' : 'Gasto'}
+        </span>`;
+
+        const userCell = row.insertCell();
+        userCell.textContent = transaction.userName || '-';
+
+        const categoryCell = row.insertCell();
+        categoryCell.textContent = transaction.category || '-';
+
+        const amountCell = row.insertCell();
+        amountCell.className = 'text-end';
+        amountCell.innerHTML = `<span class="transaction-amount ${transaction.type === 'income' ? 'income' : 'expense'}">
+          ${transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)} ${settings.currency}
+        </span>`;
+
+        const actionsCell = row.insertCell();
+        actionsCell.className = 'text-center';
+      });
+      const all = document.querySelectorAll('.row-select');
+      const checked = document.querySelectorAll('.row-select:checked');
+      selectAllCheckbox.checked = (all.length > 0 && checked.length === all.length);
+      selectAllCheckbox.indeterminate = (checked.length > 0 && checked.length < all.length);
+    }
+
+    function showLoader() {
+      loader.style.visibility = 'visible';
+    }
+
+    function hideLoader() {
+      loader.style.visibility = 'hidden';
+    }
+
+    function toggleBulkMode() {
+      selectedUsers = [];
+      updateSelectedUsersList();
+      document.querySelectorAll('#bulkUsersList input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      bulkModeModal.show();
+    }
+
+    function selectAllUsers() {
+      selectedUsers = [];
+      document.querySelectorAll('#bulkUsersList input[type="checkbox"]').forEach(checkbox => {
+        if (checkbox.value !== '0') {  // NO SELECCIONA "TODA EL AULA" 
+          checkbox.checked = true;
+          selectedUsers.push(parseInt(checkbox.value));
+        }
+      });
+      updateSelectedUsersList();
+    }
+
+    function setupEventListeners() {
+      addIncomeBtn.addEventListener('click', addTransaction);
+
+      filterType.addEventListener('change', renderTransactions);
+      filterCategory.addEventListener('input', renderTransactions);
+      resetFiltersBtn.addEventListener('click', () => {
+        filterType.value = '';
+        filterCategory.value = '';
+        renderTransactions();
+      });
+      printReportBtn.addEventListener('click', generatePDF);
+      deleteSelectedHeaderBtn.addEventListener('click', deleteSelectedTransactions);
+      selectAllCheckbox.addEventListener('change', (e) => {
+        const checked = e.target.checked;
+        document.querySelectorAll('.row-select').forEach(cb => {
+          cb.checked = checked;
+          const id = cb.getAttribute('data-id');
+          if (checked) selectedTransactionIds.add(id);
+          else selectedTransactionIds.delete(id);
+        });
+      });
+      bulkModeBtn.addEventListener('click', toggleBulkMode);
+      selectAllBtn.addEventListener('click', selectAllUsers);
+      bulkCreateBtn.addEventListener('click', createBulkTransactions);
+    }
+
+    function createBulkTransactions() {
+      const date = transactionDate.value;
+      const type = transactionType.value;
+      const category = transactionCategory.value.trim();
+      const amount = parseFloat(transactionAmount.value);
+
+      if (!date || !type || !category || !amount || amount <= 0 || selectedUsers.length === 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Por favor completa todos los campos y selecciona al menos un usuario'
+        });
+        return;
+      }
+
+      if (type === 'expense') {
+        const { balance } = calculateTotals();
+        const totalNeeded = amount * selectedUsers.length;
+        if (balance - totalNeeded < 0) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Fondo insuficiente',
+            text: `No tienes suficiente saldo para ${selectedUsers.length} transacciones. Se necesita: ${totalNeeded.toFixed(2)} ${settings.currency}, TOTAL: ${balance.toFixed(2)} ${settings.currency}`
+          });
+          return;
+        }
+      }
+
+      showLoader();
+
+      setTimeout(() => {
+        let createdCount = 0;
+        selectedUsers.forEach(userId => {
+          const user = users.find(u => u.id === userId);
+          const transaction = {
+            id: Date.now() + Math.random(),
+            date: date,
+            type: type,
+            userId: userId,
+            userName: user.name,
+            category: category,
+            amount: amount,
+            description: category
+          };
+
+          transactions.push(transaction);
+          createdCount++;
+        });
+
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        saveToLocalStorage();
+        clearForm();
+        selectedUsers = [];
+        updateSelectedUsersList();
+
+        document.querySelectorAll('#bulkUsersList input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+        });
+
+        renderTransactions();
+
+        bulkModeModal.hide();
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: `${createdCount} transacciones creadas correctamente`,
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        hideLoader();
+      }, 300);
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+
+    function generatePDF() {
+      showLoader();
+
+      try {
+
+        if (!transactions || transactions.length === 0) {
+          hideLoader();
+          Swal.fire({
+            icon: 'warning',
+            title: 'Advertencia',
+            text: 'No hay transacciones para generar el PDF',
+            timer: 3000,
+            showConfirmButton: false
+          });
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+
+        if (!jsPDF) {
+          throw new Error('jsPDF no está cargado correctamente');
+        }
+
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const primaryColor = [67, 97, 238];
+        const successColor = [25, 135, 84];
+        const dangerColor = [220, 53, 69];
+
+        doc.setFontSize(20);
+        doc.setTextColor(67, 97, 238);
+        doc.text('Reporte de Transacciones', 14, 20);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generado: ${new Date().toLocaleDateString('es-HN')}`, 14, 28);
+
+        doc.setFontSize(11);
+        doc.setTextColor(50, 50, 50);
+
+        const { income, expense, balance } = calculateTotals();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const statsY = 40;
+        const boxWidth = (pageWidth - 28) / 3;
+
+        doc.setFillColor(217, 237, 247);
+        doc.rect(14, statsY, boxWidth - 2, 20, 'F');
+        doc.setTextColor(25, 135, 84);
+        doc.setFontSize(10);
+        doc.text('INGRESOS TOTALES', 14 + 5, statsY + 6);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${income.toFixed(2)} ${settings.currency}`, 14 + 5, statsY + 15);
+
+        doc.setFillColor(248, 215, 218);
+        doc.rect(14 + boxWidth, statsY, boxWidth - 2, 20, 'F');
+        doc.setTextColor(220, 53, 69);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text('GASTOS TOTALES', 14 + boxWidth + 5, statsY + 6);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${expense.toFixed(2)} ${settings.currency}`, 14 + boxWidth + 5, statsY + 15);
+
+        const balanceColor = balance < 0 ? [220, 53, 69] : [25, 135, 84];
+        doc.setFillColor(209, 231, 221);
+        doc.rect(14 + boxWidth * 2, statsY, boxWidth - 2, 20, 'F');
+        doc.setTextColor(balanceColor[0], balanceColor[1], balanceColor[2]);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text('TOTAL', 14 + boxWidth * 2 + 5, statsY + 6);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${balance.toFixed(2)} ${settings.currency}`, 14 + boxWidth * 2 + 5, statsY + 15);
+
+        const fileName = `Reporte_Transacciones_${new Date().toISOString().split('T')[0]}.pdf`;
+
+        doc.save(fileName);
+
+        setTimeout(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'PDF Generado',
+            text: `Reporte descargado como ${fileName}`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+          hideLoader();
+        }, 500);
+
+      } catch (error) {
+        console.error('Error al generar PDF:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `No se pudo generar el PDF: ${error.message}`,
+          timer: 3000,
+          showConfirmButton: true
+        });
+        hideLoader();
+      }
+    }
+
+    function deleteSelectedTransactions() {
+      if (!selectedTransactionIds || selectedTransactionIds.size === 0) {
+        Swal.fire({ icon: 'warning', title: 'Advertencia', text: 'Selecciona al menos una transacción para eliminar' });
+        return;
+      }
+      Swal.fire({
+        title: 'Confirmar eliminación',
+        text: `Se eliminarán ${selectedTransactionIds.size} transacción(es). Esta acción no se puede deshacer.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar seleccionadas',
+        cancelButtonText: 'Cancelar'
+      }).then((finalResult) => {
+        if (finalResult.isConfirmed) {
+          showLoader();
+          setTimeout(() => {
+            transactions = transactions.filter(t => !selectedTransactionIds.has(String(t.id)));
+            selectedTransactionIds.clear();
+            const sel = document.getElementById('selectAllCheckbox');
+            if (sel) { sel.checked = false; sel.indeterminate = false; }
+            saveToLocalStorage();
+            renderTransactions();
+            hideLoader();
+            Swal.fire({ icon: 'success', title: 'Eliminado', text: 'Las transacciones seleccionadas han sido eliminadas', timer: 1500, showConfirmButton: false });
+          }, 300);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
